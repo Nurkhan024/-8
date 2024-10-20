@@ -1,0 +1,101 @@
+using System;
+using System.Collections.Generic;
+
+public interface ICommand
+{
+    void Execute();
+    void Undo();
+}
+public class Light
+{
+    public void On() => Console.WriteLine("Свет включен");
+    public void Off() => Console.WriteLine("Свет выключен");
+}
+public class AirConditioner
+{
+    public void IncreaseTemperature() => Console.WriteLine("Температура увеличена");
+    public void DecreaseTemperature() => Console.WriteLine("Температура уменьшена");
+}
+public class TV
+{
+    public void On() => Console.WriteLine("Телевизор включен");
+    public void Off() => Console.WriteLine("Телевизор выключен");
+}
+public class LightOnCommand : ICommand
+{
+    private Light _light;
+    public LightOnCommand(Light light) => _light = light;
+    public void Execute() => _light.On();
+    public void Undo() => _light.Off();
+}
+public class LightOffCommand : ICommand
+{
+    private Light _light;
+    public LightOffCommand(Light light) => _light = light;
+    public void Execute() => _light.Off();
+    public void Undo() => _light.On();
+}
+public class ACIncreaseCommand : ICommand
+{
+    private AirConditioner _ac;
+    public ACIncreaseCommand(AirConditioner ac) => _ac = ac;
+    public void Execute() => _ac.IncreaseTemperature();
+    public void Undo() => _ac.DecreaseTemperature();
+}
+public class TVOnCommand : ICommand
+{
+    private TV _tv;
+    public TVOnCommand(TV tv) => _tv = tv;
+    public void Execute() => _tv.On();
+    public void Undo() => _tv.Off();
+}
+public class TVOffCommand : ICommand
+{
+    private TV _tv;
+    public TVOffCommand(TV tv) => _tv = tv;
+    public void Execute() => _tv.Off();
+    public void Undo() => _tv.On();
+}
+public class RemoteControl
+{
+    private ICommand _lastCommand;
+    private Stack<ICommand> _history = new Stack<ICommand>();
+
+    public void SetCommand(ICommand command)
+    {
+        _lastCommand = command;
+        _lastCommand.Execute();
+        _history.Push(_lastCommand);
+    }
+
+    public void Undo()
+    {
+        if (_history.Count > 0)
+        {
+            ICommand command = _history.Pop();
+            command.Undo();
+        }
+    }
+}
+
+class Program
+{
+    static void Main(string[] args)
+    {
+        RemoteControl remote = new RemoteControl();
+        Light light = new Light();
+        AirConditioner ac = new AirConditioner();
+        TV tv = new TV();
+
+        ICommand lightOn = new LightOnCommand(light);
+        ICommand acIncrease = new ACIncreaseCommand(ac);
+        ICommand tvOn = new TVOnCommand(tv);
+        ICommand tvOff = new TVOffCommand(tv);
+
+        remote.SetCommand(lightOn);
+        remote.SetCommand(tvOn);
+        remote.SetCommand(acIncrease);
+        remote.Undo();
+        remote.SetCommand(tvOff);
+    }
+}
