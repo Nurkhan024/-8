@@ -1,0 +1,77 @@
+using System;
+using System.Collections.Generic;
+
+public interface IMediator
+{
+    void SendMessage(string message, User user);
+    void AddUser(User user);
+}
+
+public class ChatMediator : IMediator
+{
+    private List<User> _users = new List<User>();
+
+    public void AddUser(User user)
+    {
+        _users.Add(user);
+        Console.WriteLine($"{user.Name} присоединился к чату.");
+    }
+
+    public void SendMessage(string message, User user)
+    {
+        foreach (var u in _users)
+        {
+            if (u != user)
+            {
+                u.ReceiveMessage(message);
+            }
+        }
+    }
+}
+
+public abstract class User
+{
+    protected IMediator _mediator;
+    public string Name { get; }
+
+    public User(IMediator mediator, string name)
+    {
+        _mediator = mediator;
+        Name = name;
+    }
+
+    public void SendMessage(string message)
+    {
+        Console.WriteLine($"{Name} отправляет: {message}");
+        _mediator.SendMessage(message, this);
+    }
+
+    public abstract void ReceiveMessage(string message);
+}
+
+public class ConcreteUser : User
+{
+    public ConcreteUser(IMediator mediator, string name) : base(mediator, name) { }
+
+    public override void ReceiveMessage(string message)
+    {
+        Console.WriteLine($"{Name} получает: {message}");
+    }
+}
+
+class Program
+{
+    static void Main(string[] args)
+    {
+        ChatMediator mediator = new ChatMediator();
+
+        User nur = new ConcreteUser(mediator, "Нур");
+        User dias = new ConcreteUser(mediator, "Диас");
+
+        mediator.AddUser(nur);
+        mediator.AddUser(dias);
+
+        nur.SendMessage("Всем привет!");
+        dias.SendMessage("Привет, Нур!");
+    }
+}
