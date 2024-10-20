@@ -1,0 +1,44 @@
+using System;
+
+public abstract class ReportGenerator
+{
+    public void GenerateReport()
+    {
+        GatherData();
+        FormatData();
+        if (CustomerWantsSave())
+        {
+            SaveReport();
+        }
+    }
+
+    protected abstract void GatherData();
+    protected abstract void FormatData();
+    protected virtual void SaveReport() => Console.WriteLine("Отчет сохранен");
+    protected virtual bool CustomerWantsSave() => true;
+}
+
+public class PdfReport : ReportGenerator
+{
+    protected override void GatherData() => Console.WriteLine("Сбор данных для PDF");
+    protected override void FormatData() => Console.WriteLine("Форматирование данных в PDF");
+}
+
+public class ExcelReport : ReportGenerator
+{
+    protected override void GatherData() => Console.WriteLine("Сбор данных для Excel");
+    protected override void FormatData() => Console.WriteLine("Форматирование данных в Excel");
+    protected override bool CustomerWantsSave() => false;
+}
+
+class Program
+{
+    static void Main(string[] args)
+    {
+        ReportGenerator pdfReport = new PdfReport();
+        pdfReport.GenerateReport();
+
+        ReportGenerator excelReport = new ExcelReport();
+        excelReport.GenerateReport();
+    }
+}
